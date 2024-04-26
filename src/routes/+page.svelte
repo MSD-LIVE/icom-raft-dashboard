@@ -389,7 +389,7 @@
 
     <div class="flex flex-col w-full bg-black/90 backdrop-blur backdrop-grayscale mt-[calc(100vh-5rem)]">
 
-        <div class="flex flex-row w-full h-[calc(100vh-7.5rem)]">
+        <div class="flex flex-row flex-wrap w-full min-h-[calc(100vh-7.5rem)]">
 
             <div class="w-[var(--width)] shrink-0 h-full p-4 flex flex-col gap-y-8" style="--width:{chartWidth}px">
                 <div class="flex flex-row">
@@ -484,7 +484,7 @@
                 <div bind:this={vmaxPlot} class="svg-container w-full flex-1 shrink-0" role="img" />
             </div>
 
-            <div class="flex-1 w-full h-full p-4">
+            <div class="flex-1 w-full min-w-96 min-h-96 h-auto p-4">
                 {#if stormBounds}
                 <MapLibre
                     bounds={stormBounds}
