@@ -124,6 +124,7 @@
             return d;
         })).then(d => {
             stormData = d;
+            console.log(d);
             stormTrack = {
                 type: 'Feature',
                 geometry: {
@@ -189,13 +190,13 @@
     $: activeScenarios = scenarios.filter(s => selectedScenarios.includes(s.id));
 
     $: if (storm && stormData && activeScenarios) {
-        const useColorScale = activeScenarios.filter(s => s.id !== 'ibtracs').length == 1;
+        const useColorScale = activeScenarios.filter(s => s.id !== 'ibtracs').length <= 1;
 
         // intensity plot
         vmaxPlot?.firstChild?.remove();
         vmaxPlot?.append(Plot.plot({
-            width: chartWidth,
-            height: chartHeight,
+            width: chartWidth/1.25,
+            height: chartHeight/1.25,
             x: {type: 'utc', label: 'Time (UTC)'},
             y: {grid: true, label: 'Intensity vmax (knots)', domain: [0, 185]},
             marks: [
@@ -235,18 +236,20 @@
                     y1: 0,
                     y2: 185,
                     fill: 'white',
-                    fillOpacity: 0.05,
+                    fillOpacity: 0.1,
                 }),
-                activeScenarios.find(s => s.id == 'ibtracs') && Plot.line(stormData.filter(d => d.vmax_kts_ibtracs), {
+                activeScenarios.find(s => s.id == 'ibtracs') && Plot.line(stormData.filter(d => (d.vmax_kts_ibtracs != null)), {
                     x: "time", y: "vmax_kts_ibtracs",
                     strokeWidth: 4,
                     curve: 'catmull-rom',
                     stroke: `hsl(${scenarios[0].color})`,
                 }),
-                Plot.ruleX(stormData.filter(d => d['vmax_kts_baseline']), Plot.pointerX({
+                Plot.ruleX(stormData.filter(d => (d['vmax_kts_baseline'] != null)), Plot.pointerX({
                     x: "time",
                     stroke: "red",
                     channels: {
+                        'Latitude': 'lat',
+                        'Longitude': 'lon',
                         ...activeScenarios.reduce((o, s) => ({
                             ...o,
                             [s.name]: `vmax_kts_${s.id}`
@@ -256,11 +259,18 @@
                         fill: 'black',
                         pointerSize: 0,
                         frameAnchor: "top",
+                        fontSize: 12,
                         format: {
                             x: true,
                             y: false,
                             stroke: false,
                             fill: false,
+                            Latitude: true,
+                            Longitude: true,
+                            ...activeScenarios.reduce((o, s) =>({
+                                ...o,
+                                [s.name]: d => d.toFixed(0),
+                            }), {})
                         },
                     },
                 })),
@@ -284,11 +294,11 @@
             { element: shrdPlot,  variable: 'SHRD_t0',  title: "SHRD",   domain: [0, 1000],    },
             { element: delvPlot,  variable: 'DELV_6',   title: "DELV",   domain: [-50, 20],    },
             { element: eptkPlot,  variable: 'EPTK_t0',  title: "EPTK",   domain: [2900, 3800], },
+            { element: rhloPlot,  variable: 'RHLO_t0',  title: "RHLO",   domain: [20, 100],    },
         ];
         const bonusPlotsStatic = [
             { element: lp500Plot, variable: 'LP500_t0_baseline', title: "LP500",  domain: [0, 1],       },
             { element: pslvPlot,  variable: 'PSLV_v3_baseline',  title: "PSLV",   domain: [0, 450],     },
-            { element: rhloPlot,  variable: 'RHLO_t0_baseline',  title: "RHLO",   domain: [20, 100],    },
             { element: latPlot,   variable: 'lat',  title: "latitude",   domain: [0, 55],      },
             { element: lonPlot,   variable: 'lon',  title: "longitude",  domain: [-115, 0],    },
         ];
@@ -297,8 +307,8 @@
             bp.element?.append(Plot.plot({
                 width: smallChartWidth,
                 height: smallChartHeight,
-                x: {type: 'utc', label: 'Time (UTC)'},
-                y: {grid: true, label: bp.title, domain: bp.domain},
+                x: {type: 'utc', label: '', labelArrow: 'none',},
+                y: {grid: true, label: '', labelArrow: 'none', domain: bp.domain},
                 marks: [
                     ...activeScenarios.filter(s => s.id !== 'ibtracs').flatMap(s => ([
                         Plot.line(stormData.filter(d => d[`${bp.variable}_${s.id}`]), {
@@ -307,7 +317,7 @@
                             curve: 'catmull-rom',
                             stroke: `hsl(${s.color})`,
                         }),
-                        Plot.dot(stormData.filter(d => d[`${bp.variable}_${s.id}`]), {
+                        Plot.dot(stormData.filter(d => (d[`${bp.variable}_${s.id}`] != null)), {
                             x: "time", y: `${bp.variable}_${s.id}`,
                             symbol: s.symbol,
                             r: 2,
@@ -323,16 +333,16 @@
             bp.element?.append(Plot.plot({
                 width: smallChartWidth,
                 height: smallChartHeight,
-                x: {type: 'utc', label: 'Time (UTC)'},
-                y: {grid: true, label: bp.title, domain: bp.domain},
+                x: {type: 'utc', label: '', labelArrow: 'none'},
+                y: {grid: true, label: '', labelArrow: 'none', domain: bp.domain},
                 marks: [
-                    Plot.line(stormData.filter(d => d[`${bp.variable}`]), {
+                    Plot.line(stormData.filter(d => (d[`${bp.variable}`]) != null), {
                         x: "time", y: `${bp.variable}`,
                         strokeWidth: 2,
                         curve: 'catmull-rom',
                         stroke: 'white',
                     }),
-                    Plot.dot(stormData.filter(d => d[`${bp.variable}`]), {
+                    Plot.dot(stormData.filter(d => (d.vmax_kts_baseline != null) && (d[`${bp.variable}`] != null)), {
                         x: "time", y: `${bp.variable}`,
                         r: 2,
                         stroke: 'white',
@@ -394,8 +404,26 @@
             <div class="w-[var(--width)] shrink-0 h-full p-4 flex flex-col gap-y-8" style="--width:{chartWidth}px">
                 <div class="flex flex-row">
                     <div class="flex flex-col gap-y-2">
-                        <h3 class="text-xl font-semibold">
+                        <h3 class="text-xl font-semibold flex flex-row items-center gap-x-2">
                             Scenarios
+                            <button
+                                class="relative tooltip-container cursor-help"
+                                style="
+                                    --tooltip-background-color: #fff;
+                                    --tooltip-color: #000;
+                                    --tooltip-offset-x: 10px;
+                                "
+                                on:click|preventDefault|stopPropagation
+                                use:tooltip={{
+                                    content: 'TODO',
+                                    autoPosition: true,
+                                    hideOnClickOutside: true,
+                                    action: 'click',
+                                    position: 'right',
+                                }}
+                            >
+                                <PhInfoDuotone />
+                            </button>
                         </h3>
                         <div class="flex flex-row items-center gap-x-4 h-8 pb-2 ">
                             <button
@@ -416,7 +444,7 @@
                         <div class="flex flex-row flex-wrap gap-x-8 gap-y-4">
                         {#each scenarios as s}
                             <label class="w-56 flex flex-row items-center gap-x-2">
-                                <input class="" type="checkbox" bind:group={selectedScenarios} value={s.id}/>
+                                <input class="" type="checkbox" disabled={s.id==='ibtracs'} bind:group={selectedScenarios} value={s.id}/>
                                 {#if (s.symbol === 'circle')}
                                 <div class="w-4 h-4 rounded-full bg-custom-color/50 border border-custom-color" style="--custom-color:{s.color}"/>
                                 {:else if (s.symbol === 'square')}
@@ -424,60 +452,48 @@
                                 {:else if (s.symbol === 'line')}
                                 <div class="w-4 h-1 bg-custom-color" style="--custom-color:{s.color}"/>
                                 {/if}
-                                <button
-                                    class="relative tooltip-container cursor-help"
-                                    style="
-                                        --tooltip-background-color: #fff;
-                                        --tooltip-color: #000;
-                                        --tooltip-offset-x: 10px;
-                                    "
-                                    on:click|preventDefault|stopPropagation
-                                    use:tooltip={{
-                                        content: s.description,
-                                        autoPosition: true,
-                                        hideOnClickOutside: true,
-                                        action: 'click',
-                                        position: 'right',
-                                    }}
-                                >
-                                    <PhInfoDuotone />
-                                </button>
                                 {s.name}
                             </label>
                         {/each}
                         </div>
                     </div>
                     <div class="flex flex-col items-end">
-                        <span class="">
-                            Knots
-                        </span>
-                        <div class="flex flex-row items-start">
-                            <div class="flex flex-col-reverse pt-2">
-                                {#each colorScale as c}
+                        <div
+                            class="transition-all
+                            {(activeScenarios.filter(s => s.id !== 'ibtracs').length <= 1) ? 'grayscale-0 opacity-100' : 'grayscale opacity-25'}
+                            "
+                        >
+                            <span class="">
+                                Knots
+                            </span>
+                            <div class="flex flex-row items-start">
+                                <div class="flex flex-col-reverse pt-2">
+                                    {#each colorScale as c}
+                                        <span class="w-8 h-4 text-xs text-end">
+                                            {c.min} -
+                                        </span>
+                                    {/each}
                                     <span class="w-8 h-4 text-xs text-end">
-                                        {c.min} -
+                                        {colorScale[colorScale.length-1].min + 10} -
                                     </span>
+                                </div>
+                                <div class="flex flex-col-reverse">
+                                {#each colorScale as c}
+                                    <div class="w-4 h-4 bg-[var(--color)]" style="--color: {c.color}" />
                                 {/each}
-                                <span class="w-8 h-4 text-xs text-end">
-                                    {colorScale[colorScale.length-1].min + 10} -
-                                </span>
-                            </div>
-                            <div class="flex flex-col-reverse">
-                            {#each colorScale as c}
-                                <div class="w-4 h-4 bg-[var(--color)]" style="--color: {c.color}" />
-                            {/each}
-                            <div style="
-                                width: 0;
-                                height: 0;
-                                border: 0.5rem solid transparent;
-                                border-top: 0;
-                                border-bottom: 1rem solid {colorScale[colorScale.length-1].color};
-                            "/>
+                                <div style="
+                                    width: 0;
+                                    height: 0;
+                                    border: 0.5rem solid transparent;
+                                    border-top: 0;
+                                    border-bottom: 1rem solid {colorScale[colorScale.length-1].color};
+                                "/>
+                                </div>
                             </div>
                         </div>
                         <div class="flex flex-row items-end justify-center gap-x-1 mt-2">
                             <span class="text-xs">Overland:</span>
-                            <div class="w-3 h-5 bg-white/20"/>
+                            <div class="w-3 h-5 bg-white/25"/>
                         </div>
                     </div>
                 </div>
@@ -534,10 +550,12 @@
                             <Popup openOn="hover" let:features>
                                 <div class="text-xs text-white">
                                     <p><span class="font-semibold">Time (UTC):</span> {format(features[0].properties.time)}</p>
+                                    <p><span class="font-semibold">Latitude:</span> {features[0].geometry.coordinates[1].toFixed(2)}</p>
+                                    <p><span class="font-semibold">Longitude:</span> {features[0].geometry.coordinates[0].toFixed(2)}</p>
                                     {#each scenarios.filter(s => selectedScenarios.includes(s.id)) as s}
                                         <p>
                                             <span class="font-semibold">{s.name} intensity vmax (knots):</span>
-                                            {features[0].properties[`vmax_kts_${s.id}`].toFixed(2)}
+                                            {features[0].properties[`vmax_kts_${s.id}`].toFixed(0)}
                                         </p>
                                     {/each}
                                 </div>
@@ -562,19 +580,250 @@
             <div
                 class="
                     {showMore ? 'flex' : 'hidden'}
+                    gap-4 w-
                     flex-row flex-wrap items-center justify-around
                 "
             >
-                <div bind:this={vmpiPlot} class="svg-container" role="img" />
-                <div bind:this={u200Plot} class="svg-container" role="img" />
-                <div bind:this={shrdPlot} class="svg-container" role="img" />
-                <div bind:this={delvPlot} class="svg-container" role="img" />
-                <div bind:this={eptkPlot} class="svg-container" role="img" />
-                <div bind:this={lp500Plot} class="svg-container" role="img" />
-                <div bind:this={pslvPlot} class="svg-container" role="img" />
-                <div bind:this={rhloPlot} class="svg-container" role="img" />
-                <div bind:this={latPlot} class="svg-container" role="img" />
-                <div bind:this={lonPlot} class="svg-container" role="img" />
+                <div class="w-96 h-64 flex flex-col items-center">
+                    <div class="flex flex-row items-center gap-x-2">
+                        <span class="">VMPI</span>
+                        <button
+                            class="relative tooltip-container-bottom cursor-help"
+                            style="
+                                --tooltip-background-color: #fff;
+                                --tooltip-color: #000;
+                                --tooltip-offset-x: 10px;
+                            "
+                            on:click|preventDefault|stopPropagation
+                            use:tooltip={{
+                                content: 'Maximum potential intensity from Kerry Emanuel equation (kt) at current position t0',
+                                autoPosition: true,
+                                hideOnClickOutside: true,
+                                action: 'click',
+                                position: 'bottom',
+                            }}
+                        >
+                            <PhInfoDuotone />
+                        </button>
+                    </div>
+                    <div class="flex-1 svg-container" bind:this={vmpiPlot}  role="img" />
+                </div>
+                <div class="w-96 h-64 flex flex-col items-center">
+                    <div class="flex flex-row items-center gap-x-2">
+                        <span class="">U200</span>
+                        <button
+                            class="relative tooltip-container-bottom cursor-help"
+                            style="
+                                --tooltip-background-color: #fff;
+                                --tooltip-color: #000;
+                                --tooltip-offset-x: 10px;
+                            "
+                            on:click|preventDefault|stopPropagation
+                            use:tooltip={{
+                                content: '200 hPa zonal wind (kt *10) (r=200-800 km) at current position t0',
+                                autoPosition: true,
+                                hideOnClickOutside: true,
+                                action: 'click',
+                                position: 'bottom',
+                            }}
+                        >
+                            <PhInfoDuotone />
+                        </button>
+                    </div>
+                    <div class="flex-1 svg-container" bind:this={u200Plot}  role="img" />
+                </div>
+                <div class="w-96 h-64 flex flex-col items-center">
+                    <div class="flex flex-row items-center gap-x-2">
+                        <span class="">SHRD</span>
+                        <button
+                            class="relative tooltip-container-bottom cursor-help"
+                            style="
+                                --tooltip-background-color: #fff;
+                                --tooltip-color: #000;
+                                --tooltip-offset-x: 10px;
+                            "
+                            on:click|preventDefault|stopPropagation
+                            use:tooltip={{
+                                content: '850-200 hPa shear magnitude (kt *10) (200-800 km) at current position t0',
+                                autoPosition: true,
+                                hideOnClickOutside: true,
+                                action: 'click',
+                                position: 'bottom',
+                            }}
+                        >
+                            <PhInfoDuotone />
+                        </button>
+                    </div>
+                    <div class="flex-1 svg-container" bind:this={shrdPlot}  role="img" />
+                </div>
+                <div class="w-96 h-64 flex flex-col items-center">
+                    <div class="flex flex-row items-center gap-x-2">
+                        <span class="">DELV</span>
+                        <button
+                            class="relative tooltip-container-bottom cursor-help"
+                            style="
+                                --tooltip-background-color: #fff;
+                                --tooltip-color: #000;
+                                --tooltip-offset-x: 10px;
+                            "
+                            on:click|preventDefault|stopPropagation
+                            use:tooltip={{
+                                content: 'Intensity change in the last 6 hours',
+                                autoPosition: true,
+                                hideOnClickOutside: true,
+                                action: 'click',
+                                position: 'bottom',
+                            }}
+                        >
+                            <PhInfoDuotone />
+                        </button>
+                    </div>
+                    <div class="flex-1 svg-container" bind:this={delvPlot}  role="img" />
+                </div>
+                <div class="w-96 h-64 flex flex-col items-center">
+                    <div class="flex flex-row items-center gap-x-2">
+                        <span class="">EPTK</span>
+                        <button
+                            class="relative tooltip-container-bottom cursor-help"
+                            style="
+                                --tooltip-background-color: #fff;
+                                --tooltip-color: #000;
+                                --tooltip-offset-x: 10px;
+                            "
+                            on:click|preventDefault|stopPropagation
+                            use:tooltip={{
+                                content: '1000 hPa theta_e (r=200-800 km) (deg K*10) at current position t0',
+                                autoPosition: true,
+                                hideOnClickOutside: true,
+                                action: 'click',
+                                position: 'bottom',
+                            }}
+                        >
+                            <PhInfoDuotone />
+                        </button>
+                    </div>
+                    <div class="flex-1 svg-container" bind:this={eptkPlot}  role="img" />
+                </div>
+                <div class="w-96 h-64 flex flex-col items-center">
+                    <div class="flex flex-row items-center gap-x-2">
+                        <span class="">RHLO</span>
+                        <button
+                            class="relative tooltip-container-bottom cursor-help"
+                            style="
+                                --tooltip-background-color: #fff;
+                                --tooltip-color: #000;
+                                --tooltip-offset-x: 10px;
+                            "
+                            on:click|preventDefault|stopPropagation
+                            use:tooltip={{
+                                content: '850-700 hPa relative humidity (%) (200-800 km) at current position t0',
+                                autoPosition: true,
+                                hideOnClickOutside: true,
+                                action: 'click',
+                                position: 'bottom',
+                            }}
+                        >
+                            <PhInfoDuotone />
+                        </button>
+                    </div>
+                    <div class="flex-1 svg-container" bind:this={rhloPlot}  role="img" />
+                </div>
+                <div class="w-96 h-64 flex flex-col items-center">
+                    <div class="flex flex-row items-center gap-x-2">
+                        <span class="">LP500</span>
+                        <button
+                            class="relative tooltip-container-bottom cursor-help"
+                            style="
+                                --tooltip-background-color: #fff;
+                                --tooltip-color: #000;
+                                --tooltip-offset-x: 10px;
+                            "
+                            on:click|preventDefault|stopPropagation
+                            use:tooltip={{
+                                content: 'Land percentage within 500 kilometers at current position t0',
+                                autoPosition: true,
+                                hideOnClickOutside: true,
+                                action: 'click',
+                                position: 'bottom',
+                            }}
+                        >
+                            <PhInfoDuotone />
+                        </button>
+                    </div>
+                    <div class="flex-1 svg-container" bind:this={lp500Plot} role="img" />
+                </div>
+                <div class="w-96 h-64 flex flex-col items-center">
+                    <div class="flex flex-row items-center gap-x-2">
+                        <span class="">PSLV</span>
+                        <button
+                            class="relative tooltip-container-bottom cursor-help"
+                            style="
+                                --tooltip-background-color: #fff;
+                                --tooltip-color: #000;
+                                --tooltip-offset-x: 10px;
+                            "
+                            on:click|preventDefault|stopPropagation
+                            use:tooltip={{
+                                content: 'Zonal transport speed (m/s * 10) at position in 6 hours t6',
+                                autoPosition: true,
+                                hideOnClickOutside: true,
+                                action: 'click',
+                                position: 'bottom',
+                            }}
+                        >
+                            <PhInfoDuotone />
+                        </button>
+                    </div>
+                    <div class="flex-1 svg-container" bind:this={pslvPlot}  role="img" />
+                </div>
+                <div class="w-96 h-64 flex flex-col items-center">
+                    <div class="flex flex-row items-center gap-x-2">
+                        <span class="">Latitude</span>
+                        <button
+                            class="relative tooltip-container-bottom cursor-help"
+                            style="
+                                --tooltip-background-color: #fff;
+                                --tooltip-color: #000;
+                                --tooltip-offset-x: 10px;
+                            "
+                            on:click|preventDefault|stopPropagation
+                            use:tooltip={{
+                                content: 'Storm latitude at t0',
+                                autoPosition: true,
+                                hideOnClickOutside: true,
+                                action: 'click',
+                                position: 'bottom',
+                            }}
+                        >
+                            <PhInfoDuotone />
+                        </button>
+                    </div>
+                    <div class="flex-1 svg-container" bind:this={latPlot}   role="img" />
+                </div>
+                <div class="w-96 h-64 flex flex-col items-center">
+                    <div class="flex flex-row items-center gap-x-2">
+                        <span class="">Longitude</span>
+                        <button
+                            class="relative tooltip-container-bottom cursor-help"
+                            style="
+                                --tooltip-background-color: #fff;
+                                --tooltip-color: #000;
+                                --tooltip-offset-x: 10px;
+                            "
+                            on:click|preventDefault|stopPropagation
+                            use:tooltip={{
+                                content: 'Storm longitude at t0',
+                                autoPosition: true,
+                                hideOnClickOutside: true,
+                                action: 'click',
+                                position: 'bottom',
+                            }}
+                        >
+                            <PhInfoDuotone />
+                        </button>
+                    </div>
+                    <div class="flex-1 svg-container" bind:this={lonPlot}   role="img" />
+                </div>
             </div>
         </div>
 
@@ -587,11 +836,11 @@
         >
             {#if showMore}
             <PhCaretUpDuotone class="text-xl pb-px" />
-            <p class="text-xs font-light">LESS</p>
+            <p class="ml-px text-xs font-semibold tracking-widest">LESS</p>
             <PhCaretUpDuotone class="text-xl pb-px" />
             {:else}
             <PhCaretDownDuotone class="text-xl pb-px" />
-            <p class="text-xs font-light">MORE</p>
+            <p class="ml-px text-xs font-semibold tracking-widest">MORE</p>
             <PhCaretDownDuotone class="text-xl pb-px" />
             {/if}
 

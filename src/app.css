@@ -33,6 +33,12 @@ html {
 	box-sizing: content-box;
 	top: 50% !important;
 }
+.tooltip-container-bottom > div {
+	inset: unset !important;
+	bottom: 0 !important;
+	box-sizing: content-box;
+	left: 50% !important;
+}
 
 /* Poppins */
 @font-face {
