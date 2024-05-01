@@ -10,4 +10,4 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 raw_data/.ipynb_checkpoints
 raw_data/01_11vars
-raw_data/IBTrACS.NA.v04r00.nc
+raw_data/*.nc
