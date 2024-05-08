@@ -6,10 +6,14 @@
     import { tableFromIPC } from "apache-arrow";
     import geojsonbounds from "geojson-bounds";
     import {format} from "isoformat";
+    import CarbonTropicalStorm from '~icons/carbon/tropical-storm';
     import PhInfoDuotone from '~icons/ph/info-duotone';
     import PhCaretDownDuotone from '~icons/ph/caret-down-duotone';
     import PhCaretUpDuotone from '~icons/ph/caret-up-duotone';
     import { tooltip } from "@svelte-plugins/tooltips";
+    import pnnlLogo from "$lib/img/pnnl-logo.svg";
+    import msdLogo from "$lib/img/MSD.LIVE.horiz.svg";
+    import icomLogo from "$lib/img/icom-logo.svg";
 
     import storms from "$lib/storms.js";
 
@@ -98,7 +102,7 @@
     let latPlot;
     let lonPlot;
 
-    let storm = storms.find(d => d.id == 2011);
+    let storm; // = storms.find(d => d.id == 2011);
     let isFetching = false;
     let stormData;
     let stormTrack;
@@ -124,7 +128,6 @@
             return d;
         })).then(d => {
             stormData = d;
-            console.log(d);
             stormTrack = {
                 type: 'Feature',
                 geometry: {
@@ -358,6 +361,7 @@
 
 <div class="absolute top-0 left-0 w-full h-full bg-fixed bg-cover bg-no-repeat -z-10 bg-[url('$lib/img/patricia_nasa_scott_kelly.jpg')]" />
 
+{#if storm}
 <div bind:this={scrollElement} class="w-screen h-screen overflow-y-auto relative">
     
     <div class="z-10 sticky top-0 flex flex-row text-white h-20 px-4 bg-black items-center justify-between">
@@ -397,7 +401,7 @@
         </div>
     </div>
 
-    <div class="flex flex-col w-full bg-black/90 backdrop-blur backdrop-grayscale mt-[calc(100vh-5rem)]">
+    <div class="flex flex-col w-full bg-black/90 backdrop-blur backdrop-grayscale">
 
         <div class="flex flex-row flex-wrap w-full min-h-[calc(100vh-7.5rem)]">
 
@@ -849,3 +853,113 @@
     </div>
 
 </div>
+{:else}
+<div class="w-screen h-screen overflow-y-auto relative flex flex-col bg-black/60 backdrop-blur-sm">
+    
+    <div class="z-10 sticky top-0 flex flex-row text-white h-20 px-4 bg-black items-center justify-between">
+        <div class="flex-1 flex flex-row items-center justify-start">
+            <img class="w-12 h-12 mr-4 rounded-full overflow-hidden" alt="" src="{base}/cyclone_bw.png" />
+            <div class="flex flex-col">
+                <h1 class="text-xl font-semibold leading-tight">
+                    ICoM
+                </h1>
+                <h2 class="text-lg leading-tight">
+                    RAFT Dashboard
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full h-full flex flex-col items-center justify-center gap-y-6 p-4">
+        <h3
+            class="text-3xl text-white font-semibold max-w-4xl leading-relaxed"
+            style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);"
+        >
+            Type in the name, year, or ID for the storm you're interested in.
+        </h3>
+        <div class="w-full max-w-4xl">
+            <Select
+                id="storm"
+                required
+                searchable
+                items={storms}
+                bind:value={storm}
+                placeholder="Search storms by name, year, or ID"
+                --border-radius="0"
+                --border-radius-focused="0"
+                --item-first-border-radius="0"
+                --list-border-radius="0"
+                --height="64px"
+                --item-color="black"
+                --selected-item-color="black"
+                --chevron-color="black"
+                --clear-icon-color="red"
+                --item-hover-color="black"
+            >
+                <div slot="prepend" class="mr-2 text-gray-600 text-3xl">
+                    <CarbonTropicalStorm />
+                </div>
+                <div
+                    slot="required"
+                    class="hidden md:flex flex-row items-center justify-end text-gray-600 gap-x-2 pr-2"
+                >
+                    <span class="">
+                        Try:
+                    </span>
+                    <button
+                        class="rounded-sm px-2 py-1 bg-sky-700 hover:bg-sky-600 text-white shadow-sm shadow-black/25"
+                        on:click={() => {
+                            storm = storms.find(d => d.id == 2115);
+                        }}
+                    >
+                        Irene (2011)
+                    </button>
+                    <button
+                        class="rounded-sm px-2 py-1 bg-fuchsia-800 hover:bg-fuchsia-700 text-white shadow-sm shadow-black/25"
+                        on:click={() => {
+                            storm = storms.find(d => d.id == 2011);
+                        }}
+                    >
+                        Katrina (2005)
+                    </button>
+                </div>
+            </Select>
+        </div>
+        <div
+            class="text-base text-white max-w-4xl text-justify"
+            style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);"
+        >
+            <p class="mt-2">
+                Welcome to the <span class="font-semibold">ICoM RAFT Dashboard</span>!
+            </p>
+            <p class="mt-2">
+                This dashboard can visualize <span class="font-semibold">620 individual storms</span> simulated in the
+                <a
+                    class="underline text-blue-500 font-semibold"
+                    href="/#"
+                >
+                    RAFT TGW paper
+                </a>.
+            </p>
+            <p class="mt-2">
+                When a storm is selected, the <span class="font-semibold">intensity plot</span> and <span class="font-semibold">map</span> are populated with <span class="font-semibold">RAFT’s baseline simulation</span> of intensities along the historic track.
+                To see how these storms are simulated in <span class="font-semibold">future scenarios</span>, select scenarios of interest on the left.
+                To see the model inputs used in the simulation click on “<span class="font-semibold">MORE</span>” at the bottom of the page.
+                When multiple scenarios are selected you can see which model inputs are modified by the future scenarios.
+            </p>
+        </div>
+        <div class="w-full max-w-4xl px-2 flex flex-row flex-wrap mt-12 items-center justify-evenly gap-x-12 gap-y-8">
+            <a class="h-12" href="https://icom.pnnl.gov/" target="_blank" rel="noreferrer">
+                <img src={icomLogo} alt="ICOM" class="h-full object-contain" />
+            </a>
+            <a class="h-12" href="https://msdlive.org/" target="_blank" rel="noreferrer">
+                <img src={msdLogo} alt="MSD-LIVE" class="h-full object-contain" />
+            </a>
+            <a class="h-24" href="https://pnnl.gov/" target="_blank" rel="noreferrer">
+                <img src={pnnlLogo} alt="PNNL" class="h-full object-contain" />
+            </a>
+        </div>
+    </div>
+
+</div>
+{/if}
