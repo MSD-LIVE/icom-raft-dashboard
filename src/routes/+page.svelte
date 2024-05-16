@@ -287,15 +287,21 @@
                     }))
                 ),
                 ...[
-                    {color: '#A188FC',  knots: 137},
-                    {color: '#FF738A',  knots: 113},
-                    {color: '#FF9E59',  knots:  96},
-                    {color: '#FFD98C',  knots:  83},
-                    {color: '#FFFFD9',  knots:  64},
-                    {color: '#4DFFFF', knots:  34},
-                    {color: '#6EC1EA', knots:   0},
+                    {color: '#bd3d3d',  knots: 137},
+                    {color: '#d98254',  knots: 113},
+                    {color: '#f2d67d',  knots:  96},
+                    {color: '#c7eb8c',  knots:  83},
+                    {color: '#6bc28c',  knots:  64},
+                    {color: '#4f7d9e',  knots:  34},
+                    {color: '#ffffff',  knots:   0},
                 ].map(cat => [
-                    Plot.ruleY([cat.knots], { stroke: cat.color, strokeOpacity: 0.333, strokeWidth: 2, }),
+                    Plot.ruleY(
+                        [cat.knots],
+                        {
+                            stroke: cat.color,
+                            strokeOpacity: cat.knots === 0 ? 1 : 0.667,
+                            strokeWidth: cat.knots === 0 ? 1 : 1.5,
+                        }),
                 ]),
                 Plot.axisY({grid: true, label: 'Intensity vmax (knots)', domain: [0, 185]}),
                 Plot.axisY({
