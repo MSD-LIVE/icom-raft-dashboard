@@ -286,7 +286,36 @@
                         fill: useColorScale ? (d => getColor(d.vmax_kts_baseline)) : `hsl(${s.color})`,
                     }))
                 ),
-                Plot.ruleY([0]),
+                ...[
+                    {color: '#A188FC',  knots: 137},
+                    {color: '#FF738A',  knots: 113},
+                    {color: '#FF9E59',  knots:  96},
+                    {color: '#FFD98C',  knots:  83},
+                    {color: '#FFFFD9',  knots:  64},
+                    {color: '#4DFFFF', knots:  34},
+                    {color: '#6EC1EA', knots:   0},
+                ].map(cat => [
+                    Plot.ruleY([cat.knots], { stroke: cat.color, strokeOpacity: 0.333, strokeWidth: 2, }),
+                ]),
+                Plot.axisY({grid: true, label: 'Intensity vmax (knots)', domain: [0, 185]}),
+                Plot.axisY({
+                    label: '',
+                    anchor: 'right',
+                    labelAnchor: 'center',
+                    labelArrow: false,
+                    labelOffset: 0,
+                    marginTop: 0,
+                    marginRight: 0,
+                    marginBottom: 0,
+                    marginLeft: 0,
+                    ticks: [0, 34, 64, 83, 96, 113, 137],
+                    tickSize: 0,
+                    tickPadding: 0,
+                    dx: -28,
+                    dy: -6,
+                    lineAnchor: 'bottom',
+                    tickFormat: (d, i, _) => ['    TD', '    TS', 'Cat 1', 'Cat 2', 'Cat 3', 'Cat 4', 'Cat 5'][i],
+                }),
             ],
         }));
 
