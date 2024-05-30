@@ -174,6 +174,7 @@
     }
 
     function clearStorm() {
+        storm = undefined;
         changeStorm(false);
         vmaxPlot?.firstChild.remove();
     }
@@ -399,18 +400,21 @@
 {#if storm}
 <div bind:this={scrollElement} class="w-screen h-screen overflow-y-auto relative">
     
-    <div class="z-10 sticky top-0 flex flex-row text-white h-20 px-4 bg-black items-center justify-between">
-        <div class="flex-1 flex flex-row items-center justify-start">
+    <div class="z-10 sticky top-0 flex flex-row text-white h-20 px-4 bg-black items-center justify-between shrink-0">
+        <button
+            class="flex flex-row items-center justify-start select-none text-start"
+            on:click={clearStorm}
+        >
             <img class="w-12 h-12 mr-4 rounded-full overflow-hidden" alt="" src="{base}/cyclone_bw.png" />
             <div class="flex flex-col">
                 <h1 class="text-xl font-semibold leading-tight">
-                    ICoM
+                    ICoM RAFT
                 </h1>
                 <h2 class="text-lg leading-tight">
-                    RAFT Dashboard
+                    Hurricane <span class="hidden sm:inline">Projections</span> Dashboard
                 </h2>
             </div>
-        </div>
+        </button>
         <div class="flex-1 max-w-96 flex flex-row items-center justify-center">
             <label class="mr-2 text-base font-light" for="storm">
                 STORM:
@@ -450,15 +454,29 @@
                                 style="
                                     --tooltip-background-color: #fff;
                                     --tooltip-color: #000;
-                                    --tooltip-offset-x: 10px;
                                 "
-                                on:click|preventDefault|stopPropagation
                                 use:tooltip={{
-                                    content: 'TODO',
+                                    content: `<div class="cursor-default">
+                                        Eight future climate scenarios are derived by analyzing monthly data from two emission scenarios,
+                                        SSP585 and SSP245, using global climate models categorized as 'hot' or 'cold' based on their
+                                        sensitivity to global warming. The 'near future' period spans from 2020 to 2059 while the
+                                        'far future' covers 2060 to 2099. The future climate signals are directly applied to the following
+                                        model inputs: VMPI, U200, SHRD, EPTK, and RHLO. Changes to these inputs can be viewed in the 'MORE'
+                                        section when future scenarios are selected. Future climate signals are derived following the method
+                                        in the Jones et. al.'s
+                                        <a
+                                            class="text-blue-400 cursor-pointer hover:underline underline-offset-4"
+                                            href="https://tgw-data.msdlive.org" target="_blank" rel="noreferrer"
+                                        >
+                                        <i>Continental United States climate projections based on thermodynamic modification of
+                                        historical weather</i></a>.</div>
+                                    `,
+                                    theme:'offset-tooltip',
                                     autoPosition: true,
                                     hideOnClickOutside: true,
                                     action: 'click',
                                     position: 'right',
+                                    maxWidth: 600,
                                 }}
                             >
                                 <PhInfoDuotone />
@@ -587,7 +605,7 @@
                             }}
                         >
                             <Popup openOn="hover" let:features>
-                                <div class="text-xs text-white">
+                                <div class="text-sm text-white">
                                     <p><span class="font-semibold">Time (UTC):</span> {format(features[0].properties.time)}</p>
                                     <p><span class="font-semibold">Latitude:</span> {features[0].geometry.coordinates[1].toFixed(2)}</p>
                                     <p><span class="font-semibold">Longitude:</span> {features[0].geometry.coordinates[0].toFixed(2)}</p>
@@ -619,7 +637,7 @@
             <div
                 class="
                     {showMore ? 'flex' : 'hidden'}
-                    gap-4 w-
+                    gap-x-4 gap-y-6
                     flex-row flex-wrap items-center justify-around
                 "
             >
@@ -635,7 +653,7 @@
                             "
                             on:click|preventDefault|stopPropagation
                             use:tooltip={{
-                                content: 'Maximum potential intensity from Kerry Emanuel equation (kt) at current position t0',
+                                content: 'Maximum potential intensity from Kerry Emanuel equation (kt)',
                                 autoPosition: true,
                                 hideOnClickOutside: true,
                                 action: 'click',
@@ -659,7 +677,7 @@
                             "
                             on:click|preventDefault|stopPropagation
                             use:tooltip={{
-                                content: '200 hPa zonal wind (kt *10) (r=200-800 km) at current position t0',
+                                content: '200 hPa zonal wind (kt*10) vs time (r=200-800 km)',
                                 autoPosition: true,
                                 hideOnClickOutside: true,
                                 action: 'click',
@@ -683,7 +701,7 @@
                             "
                             on:click|preventDefault|stopPropagation
                             use:tooltip={{
-                                content: '850-200 hPa shear magnitude (kt *10) (200-800 km) at current position t0',
+                                content: '850-200 hPa shear magnitude (kt*10) vs time (200-800 km)',
                                 autoPosition: true,
                                 hideOnClickOutside: true,
                                 action: 'click',
@@ -707,7 +725,7 @@
                             "
                             on:click|preventDefault|stopPropagation
                             use:tooltip={{
-                                content: 'Intensity change in the last 6 hours',
+                                content: 'Last 6 hourly intensity change (kt)',
                                 autoPosition: true,
                                 hideOnClickOutside: true,
                                 action: 'click',
@@ -731,7 +749,7 @@
                             "
                             on:click|preventDefault|stopPropagation
                             use:tooltip={{
-                                content: '1000 hPa theta_e (r=200-800 km) (deg K*10) at current position t0',
+                                content: '1000 hPa theta_e (r=200-800 km) vs time (deg K*10)',
                                 autoPosition: true,
                                 hideOnClickOutside: true,
                                 action: 'click',
@@ -755,7 +773,7 @@
                             "
                             on:click|preventDefault|stopPropagation
                             use:tooltip={{
-                                content: '850-700 hPa relative humidity (%) (200-800 km) at current position t0',
+                                content: '850-700 hPa relative humidity (%) vs time (200-800 km)',
                                 autoPosition: true,
                                 hideOnClickOutside: true,
                                 action: 'click',
@@ -779,7 +797,7 @@
                             "
                             on:click|preventDefault|stopPropagation
                             use:tooltip={{
-                                content: 'Land percentage within 500 kilometers at current position t0',
+                                content: 'Land percentage within 500 kilometers at current position',
                                 autoPosition: true,
                                 hideOnClickOutside: true,
                                 action: 'click',
@@ -803,7 +821,7 @@
                             "
                             on:click|preventDefault|stopPropagation
                             use:tooltip={{
-                                content: 'Zonal transport speed (m/s * 10) at position in 6 hours t6',
+                                content: 'The observed zonal storm motion component (m/s*10) at position in 6 hours',
                                 autoPosition: true,
                                 hideOnClickOutside: true,
                                 action: 'click',
@@ -827,7 +845,7 @@
                             "
                             on:click|preventDefault|stopPropagation
                             use:tooltip={{
-                                content: 'Storm latitude at t0',
+                                content: 'Storm center latitude in degrees North',
                                 autoPosition: true,
                                 hideOnClickOutside: true,
                                 action: 'click',
@@ -851,7 +869,7 @@
                             "
                             on:click|preventDefault|stopPropagation
                             use:tooltip={{
-                                content: 'Storm longitude at t0',
+                                content: 'Storm center longitude in degrees East (negative values for West of Prime Meridian)',
                                 autoPosition: true,
                                 hideOnClickOutside: true,
                                 action: 'click',
@@ -891,21 +909,21 @@
 {:else}
 <div class="w-screen h-screen overflow-y-auto relative flex flex-col bg-black/60 backdrop-blur-sm">
     
-    <div class="z-10 sticky top-0 flex flex-row text-white h-20 px-4 bg-black items-center justify-between">
+    <div class="z-10 sticky top-0 flex flex-row text-white h-20 px-4 bg-black items-center justify-between shrink-0">
         <div class="flex-1 flex flex-row items-center justify-start">
             <img class="w-12 h-12 mr-4 rounded-full overflow-hidden" alt="" src="{base}/cyclone_bw.png" />
             <div class="flex flex-col">
                 <h1 class="text-xl font-semibold leading-tight">
-                    ICoM
+                    ICoM RAFT
                 </h1>
                 <h2 class="text-lg leading-tight">
-                    RAFT Dashboard
+                    Hurricane <span class="hidden sm:inline">Projections</span> Dashboard
                 </h2>
             </div>
         </div>
     </div>
 
-    <div class="w-full h-full flex flex-col items-center justify-center gap-y-6 p-4">
+    <div class="w-full h-full flex flex-col items-center justify-start sm:justify-center gap-y-6 p-4">
         <h3
             class="text-3xl text-white font-semibold max-w-4xl leading-relaxed"
             style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);"
@@ -962,28 +980,33 @@
         </div>
         <div
             class="text-base text-white max-w-4xl text-justify"
-            style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);"
+            style="text-shadow: 1px 1px 3px rgba(0,0,0,0.25);"
         >
             <p class="mt-2">
-                Welcome to the <span class="font-semibold">ICoM RAFT Dashboard</span>!
+                Welcome to the <span class="font-semibold">ICoM RAFT Hurricane Projections Dashboard</span>!
             </p>
             <p class="mt-2">
-                This dashboard can visualize <span class="font-semibold">620 individual storms</span> simulated in the
+                This dashboard visualizes any of the <span class="font-semibold">620 historic tropical cyclones</span>
+                from 1979 to 2018 replayed under eight different future climate scenarios, as described in the poster presentation:
                 <a
-                    class="underline text-blue-500 font-semibold"
+                    class="italic text-blue-400 font-semibold hover:underline underline-offset-4"
+                    target="_blank"
+                    rel="noreferrer"
                     href="/#"
                 >
-                    RAFT TGW paper
-                </a>.
+                    North Atlantic tropical cyclone intensity projections based on thermodynamic modifications of historic environments</a>.
+                A paper and data download link will be available soon!
             </p>
             <p class="mt-2">
-                When a storm is selected, the <span class="font-semibold">intensity plot</span> and <span class="font-semibold">map</span> are populated with <span class="font-semibold">RAFT’s baseline simulation</span> of intensities along the historic track.
-                To see how these storms are simulated in <span class="font-semibold">future scenarios</span>, select scenarios of interest on the left.
-                To see the model inputs used in the simulation click on “<span class="font-semibold">MORE</span>” at the bottom of the page.
-                When multiple scenarios are selected you can see which model inputs are modified by the future scenarios.
+                When a storm is selected, the <span class="font-semibold">intensity plot</span> and <span class="font-semibold">map</span>
+                display <span class="font-semibold">RAFT's deep learning baseline simulation</span> of the historic event. The intensity plot
+                also includes a white line representing the observed intensities from the IBTrACS dataset. To assess the impact of future climate
+                scenarios, select options from the menu in the top left corner. For a deeper dive into the changes for each scenario, click
+                the "<span class="font-semibold">MORE</span>" section at the bottom which reveals how the model inputs are modified for the
+                selected scenarios.
             </p>
         </div>
-        <div class="w-full max-w-4xl px-2 flex flex-row flex-wrap mt-12 items-center justify-evenly gap-x-12 gap-y-8">
+        <div class="w-full max-w-4xl p-2 flex flex-row flex-wrap mt-12 items-center justify-evenly gap-x-12 gap-y-8">
             <a class="h-12" href="https://icom.pnnl.gov/" target="_blank" rel="noreferrer">
                 <img src={icomLogo} alt="ICOM" class="h-full object-contain" />
             </a>

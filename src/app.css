@@ -7,6 +7,13 @@ html {
     background-color: black;
 }
 
+.indicators {
+	cursor:pointer;
+}
+.value-container > input {
+	cursor: text!important;
+}
+
 .maplibregl-popup-content {
 	background: #000!important;
 }
@@ -38,6 +45,13 @@ html {
 	bottom: 0 !important;
 	box-sizing: content-box;
 	left: 50% !important;
+}
+.tooltip.offset-tooltip {
+	--tooltip-offset-x: 10px!important;
+	--tooltip-offset-y: -80px!important;
+}
+.tooltip.offset-tooltip::after {
+	transform:translate(-99%, -450%)!important;
 }
 
 /* Poppins */
