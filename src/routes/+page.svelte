@@ -992,7 +992,7 @@
                     class="italic text-blue-400 font-semibold hover:underline underline-offset-4"
                     target="_blank"
                     rel="noreferrer"
-                    href="/#"
+                    href="{base}/HydroML_2024_RAFT_hurricane_projections_poster.pdf"
                 >
                     North Atlantic tropical cyclone intensity projections based on thermodynamic modifications of historic environments</a>.
                 A paper and data download link will be available soon!
