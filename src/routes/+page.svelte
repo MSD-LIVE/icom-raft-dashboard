@@ -18,6 +18,7 @@
     import storms from "$lib/storms.js";
 
     let scrollElement;
+    let mapPopupMode = 'hover';
 
     const chartWidth = 640;
     const chartHeight = 500;
@@ -392,8 +393,16 @@
         });
     }
 
+    function onKeyUp(e) {
+        if (e.key === "`")
+            mapPopupMode = mapPopupMode === 'click' ? 'hover' : 'click';
+    }
+
 </script>
 
+<svelte:window
+    on:keyup={onKeyUp}
+/>
 
 <div class="absolute top-0 left-0 w-full h-full bg-fixed bg-cover bg-no-repeat -z-10 bg-[url('$lib/img/patricia_nasa_scott_kelly.jpg')]" />
 
@@ -604,7 +613,7 @@
                                 'circle-stroke-opacity': 1,
                             }}
                         >
-                            <Popup openOn="hover" let:features>
+                            <Popup openOn={mapPopupMode} let:features>
                                 <div class="text-sm text-white">
                                     <p><span class="font-semibold">Time (UTC):</span> {format(features[0].properties.time)}</p>
                                     <p><span class="font-semibold">Latitude:</span> {features[0].geometry.coordinates[1].toFixed(2)}</p>
