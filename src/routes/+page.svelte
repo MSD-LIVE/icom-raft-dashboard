@@ -96,7 +96,6 @@
     let u200Plot;
     let shrdPlot;
     let delvPlot;
-    let eptkPlot;
     let lp500Plot;
     let pslvPlot;
     let rhloPlot;
@@ -333,7 +332,6 @@
             { element: u200Plot,  variable: 'U200_t0',  title: "U200",   domain: [-500, 1100], },
             { element: shrdPlot,  variable: 'SHRD_t0',  title: "SHRD",   domain: [0, 1000],    },
             { element: delvPlot,  variable: 'DELV_6',   title: "DELV",   domain: [-50, 20],    },
-            { element: eptkPlot,  variable: 'EPTK_t0',  title: "EPTK",   domain: [2900, 3800], },
             { element: rhloPlot,  variable: 'RHLO_t0',  title: "RHLO",   domain: [20, 100],    },
         ];
         const bonusPlotsStatic = [
@@ -470,7 +468,7 @@
                                         SSP585 and SSP245, using global climate models categorized as 'hot' or 'cold' based on their
                                         sensitivity to global warming. The 'near future' period spans from 2020 to 2059 while the
                                         'far future' covers 2060 to 2099. The future climate signals are directly applied to the following
-                                        model inputs: VMPI, U200, SHRD, EPTK, and RHLO. Changes to these inputs can be viewed in the 'MORE'
+                                        model inputs: VMPI, U200, SHRD, and RHLO. Changes to these inputs can be viewed in the 'MORE'
                                         section when future scenarios are selected. Future climate signals are derived following the method
                                         in the Jones et. al.'s
                                         <a
@@ -745,30 +743,6 @@
                         </button>
                     </div>
                     <div class="flex-1 svg-container" bind:this={delvPlot}  role="img" />
-                </div>
-                <div class="w-96 h-64 flex flex-col items-center">
-                    <div class="flex flex-row items-center gap-x-2">
-                        <span class="">EPTK</span>
-                        <button
-                            class="relative tooltip-container-bottom cursor-help"
-                            style="
-                                --tooltip-background-color: #fff;
-                                --tooltip-color: #000;
-                                --tooltip-offset-x: 10px;
-                            "
-                            on:click|preventDefault|stopPropagation
-                            use:tooltip={{
-                                content: '1000 hPa theta_e (r=200-800 km) vs time (deg K*10)',
-                                autoPosition: true,
-                                hideOnClickOutside: true,
-                                action: 'click',
-                                position: 'bottom',
-                            }}
-                        >
-                            <PhInfoDuotone />
-                        </button>
-                    </div>
-                    <div class="flex-1 svg-container" bind:this={eptkPlot}  role="img" />
                 </div>
                 <div class="w-96 h-64 flex flex-col items-center">
                     <div class="flex flex-row items-center gap-x-2">

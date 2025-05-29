@@ -1,4 +1,4 @@
-export default [
+const storms = [
   {
     "id":1614,
     "name":"Not_Named",
@@ -3367,13 +3367,6 @@ export default [
     "value":"gaston_2010_2094"
   },
   {
-    "id":2095,
-    "name":"Hermine",
-    "year":2010,
-    "label":"Hermine (2010) [id:2095]",
-    "value":"hermine_2010_2095"
-  },
-  {
     "id":2096,
     "name":"Igor",
     "year":2010,
@@ -3722,13 +3715,6 @@ export default [
     "year":2012,
     "label":"Tony (2012) [id:2145]",
     "value":"tony_2012_2145"
-  },
-  {
-    "id":2146,
-    "name":"Barbara",
-    "year":2013,
-    "label":"Barbara (2013) [id:2146]",
-    "value":"barbara_2013_2146"
   },
   {
     "id":2147,
@@ -4339,4 +4325,6 @@ export default [
     "label":"Oscar (2018) [id:2233]",
     "value":"oscar_2018_2233"
   }
-]
+];
+
+export default storms;
